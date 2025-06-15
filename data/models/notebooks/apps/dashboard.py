@@ -5,15 +5,27 @@ import shap
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.ensemble import RandomForestClassifier
 import plotly.express as px
-import streamlit.components.v1 as components
+import os
 
 # --- PATH CONFIG ---
-MODEL_PATH = r"C:\Users\riyan\OneDrive\Desktop\churn-prediction\data\models\notebooks\model.pkl"
-FEATURES_PATH = r"C:\Users\riyan\OneDrive\Desktop\churn-prediction\data\models\notebooks\model_features.pkl"
-PREDICTIONS_CSV = r"C:\Users\riyan\OneDrive\Desktop\churn-prediction\data\models\notebooks\predictions.csv"
+import os
+import joblib
+import pandas as pd
 
+# Get the directory of the current file (apps/dashboard.py)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Go up one level (from apps/ to root), then navigate to the model files
+MODEL_PATH = os.path.join(BASE_DIR, '..', 'data', 'models', 'notebooks', 'model.pkl')
+FEATURE_PATH = os.path.join(BASE_DIR, '..', 'data', 'models', 'notebooks', 'model_features.pkl')
+PREDICTIONS_PATH = os.path.join(BASE_DIR, '..', 'data', 'models', 'notebooks', 'predictions.csv')
+
+st.write("Loading model from:", MODEL_PATH)
+st.write("Loading features from:", FEATURE_PATH)
+st.write("Loading predictions from:", PREDICTIONS_PATH)
+
+# --- STREAMLIT CONFIG ---
 st.set_page_config(page_title="Churn Prediction Dashboard", layout="wide", page_icon="📉")
 
 # --- STYLES ---
@@ -29,19 +41,20 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     model = joblib.load(MODEL_PATH)
-    features = joblib.load(FEATURES_PATH)
+    features = joblib.load(FEATURE_PATH)
     return model, features
 
 # --- LOAD PREDICTIONS ---
 @st.cache_data
 def load_predictions():
-    df = pd.read_csv(PREDICTIONS_CSV)
+    df = pd.read_csv(PREDICTIONS_PATH)
     df["Churn"] = (df["churn_probability"] >= 0.5).astype(int)
     return df
 
 model, model_features = load_model()
 df = load_predictions()
 
+# --- TITLE ---
 st.title("📉 Telco Churn Prediction Dashboard")
 st.markdown("Get customer churn insights with explainability and real-time capabilities.")
 
@@ -69,8 +82,7 @@ st.markdown("### 💾 Download Predictions")
 csv_download = df.to_csv(index=False).encode("utf-8")
 st.download_button("⬇️ Download CSV", csv_download, "churn_predictions.csv", "text/csv")
 
-
-# --- ROW 3: Real-time Prediction ---
+# --- ROW 3: Real-time Prediction (Simulated) ---
 st.subheader("📡 Real-Time Prediction (Simulated API)")
 sample_input = st.text_input("Enter CustomerID to simulate live lookup:")
 if sample_input:
@@ -81,16 +93,16 @@ if sample_input:
     else:
         st.error("Customer ID not found.")
 
-# --- ROW 4: External Behavior Signals (Simulated) ---
-st.subheader("🌐 External Behavior Signals (Demo Integration)")
+# --- ROW 4: External Signals ---
+st.subheader("🌐 External Behavior Signals (Demo)")
 if st.toggle("Show behavioral signal insights"):
     st.info("✅ External behavioral signal: **Low engagement detected**.\nCustomer support ticket opened 3x in last 30 days.")
 
 # --- FOOTER ---
 st.divider()
 st.markdown("""
-### 📱 Optimized for Mobile
-This dashboard is designed to be responsive across desktop and mobile using Streamlit's layout controls.
+### 📱 Optimized for Mobile  
+This dashboard is responsive across desktop and mobile devices.
 
-> © Harshita hemnani
+> © Harshita Hemnani
 """)
