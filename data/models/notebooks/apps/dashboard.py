@@ -1,11 +1,17 @@
 import streamlit as st
+
+# Must be the very first Streamlit command
+st.set_page_config(page_title="Churn Prediction Dashboard", layout="wide", page_icon="📉")
+
 import pandas as pd
 import numpy as np
 import shap
 import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.ensemble import RandomForestClassifier
 import plotly.express as px
+import streamlit.components.v1 as components
 import os
 
 # --- PATH CONFIG ---
